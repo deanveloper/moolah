@@ -12,7 +12,6 @@ const databaseUrl = Deno.env.get("POSTGRES_SECRET_URL")!;
 const sessionSalt = Deno.env.get("POSTGRES_SECRET_SESSION_SALT")!;
 
 const pool = new postgres.Pool(databaseUrl, 3, true);
-await initialize();
 
 export async function createSession(discordId: string): Promise<string> {
   return withConnection(async (connection) => {
@@ -86,30 +85,6 @@ export async function getDiscordId(session: string): Promise<string> {
     `;
 
     return rows[0].post_id;
-  });
-}
-
-async function initialize() {
-  withConnection(async (connection) => {
-    await connection.queryObject`
-      CREATE TABLE IF NOT EXISTS hiring_posts (
-        id BIGSERIAL PRIMARY KEY,
-        author VARCHAR(20) NOT NULL,
-        post_id VARCHAR(20) UNIQUE NOT NULL,
-        inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      );
-      CREATE TABLE IF NOT EXISTS sessions (
-        id CHAR(64) PRIMARY KEY,
-        discord_id VARCHAR(20) NOT NULL,
-        expires TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '3 days',
-        inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      );
-      CREATE TABLE IF NOT EXISTS current_session_integer (
-        id BIGSERIAL PRIMARY KEY
-      )
-      CREATE INDEX hiring_posts__author_idx ON hiring_posts(author);
-      CREATE INDEX sessions__expires_idx ON sessions(expires);
-      `;
   });
 }
 
