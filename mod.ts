@@ -1,3 +1,2 @@
-
-import './discord.ts';
-import './endpoint.ts';
+import "./discord.ts";
+import "./endpoint.ts";
